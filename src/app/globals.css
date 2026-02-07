@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 18%;
+    --foreground: 0 0% 96%;
+    --card: 0 0% 22%;
+    --card-foreground: 0 0% 96%;
+    --popover: 0 0% 22%;
+    --popover-foreground: 0 0% 96%;
+    --primary: 262 83% 58%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 24%;
+    --secondary-foreground: 0 0% 96%;
+    --muted: 0 0% 24%;
+    --muted-foreground: 220 10% 65%;
+    --accent: 0 0% 24%;
+    --accent-foreground: 0 0% 96%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 28%;
+    --input: 0 0% 28%;
+    --ring: 262 83% 58%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 0 0% 18%;
+    --foreground: 220 14% 96%;
+    --card: 0 0% 22%;
+    --card-foreground: 220 14% 96%;
+    --popover: 0 0% 22%;
+    --popover-foreground: 220 14% 96%;
+    --primary: 263 70% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 24%;
+    --secondary-foreground: 220 14% 96%;
+    --muted: 0 0% 24%;
+    --muted-foreground: 220 10% 60%;
+    --accent: 0 0% 24%;
+    --accent-foreground: 220 14% 96%;
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 28%;
+    --input: 0 0% 28%;
+    --ring: 263 70% 50%;
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background: hsl(var(--muted-foreground) / 0.2);
+}
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.3);
+}
