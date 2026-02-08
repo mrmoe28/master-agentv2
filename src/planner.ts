@@ -26,7 +26,7 @@ export async function createPlan(
         .map((r) => `- ${r.text}`)
         .join("\n");
     }
-  } catch (_) {
+  } catch {
     // Continue without knowledge base if retrieval fails
   }
 

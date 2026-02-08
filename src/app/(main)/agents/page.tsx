@@ -10,11 +10,9 @@ import { useProjectStore } from "@/stores/use-project-store";
 import { cn } from "@/lib/utils";
 
 function AgentCard({
-  id,
   name,
   role,
   status,
-  parentId,
 }: {
   id: string;
   name: string;

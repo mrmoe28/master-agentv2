@@ -1,7 +1,9 @@
 "use client";
 
 import { useRef, useEffect, useState, useCallback } from "react";
-import { Send, Loader2, Play, Trash2, X, Plus, FileText } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
+import { Send, Loader2, Play, Trash2, X, FileText, Plus, Plug } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -15,7 +17,9 @@ import { useHistoryStore } from "@/stores/use-history-store";
 import { cn } from "@/lib/utils";
 import { ChatMessageBubble } from "@/components/chat/chat-message-bubble";
 import { AssignGoalsDialog } from "@/components/dialogs/assign-goals-dialog";
+import { CreateProjectDialog } from "@/components/dialogs/create-project-dialog";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { LiveClock } from "@/components/layout/live-clock";
 import { extractTextFromPdf } from "@/lib/pdf-extract";
 import type { FileAttachment } from "@/types";
 
@@ -55,11 +59,21 @@ export function ChatArea() {
   const addLog = useLogStore((s) => s.addLog);
   const clearMessages = useChatStore((s) => s.clearMessages);
   const [goalsDialogOpen, setGoalsDialogOpen] = useState(false);
+  const [createProjectOpen, setCreateProjectOpen] = useState(false);
+  const [showGoogleHint, setShowGoogleHint] = useState(false);
   const activeProject = activeProjectId ? getProject(activeProjectId) : null;
+  const projects = useProjectStore((s) => s.projects);
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    fetch("/api/integrations/status")
+      .then((r) => r.json())
+      .then((d) => setShowGoogleHint(d.google === false && d.googleConfigMissing === false))
+      .catch(() => setShowGoogleHint(false));
+  }, []);
 
   const addPastedImage = useCallback((dataUrl: string) => {
     setPastedImages((prev) => {
@@ -261,10 +275,15 @@ export function ChatArea() {
         };
       });
     try {
+      const now = new Date();
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: apiMessages }),
+        body: JSON.stringify({
+          messages: apiMessages,
+          clientNow: now.toISOString(),
+          clientTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        }),
       });
       const text = await res.text();
       let data: { content?: string; error?: string };
@@ -374,6 +393,7 @@ export function ChatArea() {
           )}
         </div>
         <div className="flex shrink-0 items-center gap-2">
+          <LiveClock />
           <ThemeToggle />
           <Button
             variant="ghost"
@@ -402,7 +422,16 @@ export function ChatArea() {
 
       <ScrollArea className="flex-1 scrollbar-thin">
         <div className="flex flex-col gap-4 p-4">
-          {messages.length === 0 && (
+          {messages.length === 0 && projects.length === 0 && (
+            <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border bg-muted/20 px-6 py-16 text-center text-muted-foreground">
+              <p className="text-sm font-medium">Create a project to get started.</p>
+              <Button onClick={() => setCreateProjectOpen(true)} variant="secondary" className="gap-2">
+                <Plus className="h-4 w-4" />
+                Create project
+              </Button>
+            </div>
+          )}
+          {messages.length === 0 && projects.length > 0 && (
             <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border bg-muted/20 px-6 py-16 text-center text-muted-foreground">
               <p className="text-sm font-medium">Send a message or start an autonomous run.</p>
               <p className="text-xs max-w-sm">
@@ -417,6 +446,14 @@ export function ChatArea() {
         </div>
       </ScrollArea>
 
+      {showGoogleHint && (
+        <div className="shrink-0 border-t border-border px-4 py-2 text-center">
+          <Link href="/integrations" className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
+            <Plug className="h-3 w-3" />
+            Connect Google for Calendar, Gmail, Drive
+          </Link>
+        </div>
+      )}
       <div className="shrink-0 border-t border-border p-4">
         <form
           onSubmit={(e) => {
@@ -432,9 +469,12 @@ export function ChatArea() {
                   key={i}
                   className="relative inline-block rounded-lg border border-border overflow-hidden bg-muted/50"
                 >
-                  <img
+                  <Image
                     src={dataUrl}
                     alt=""
+                    width={120}
+                    height={64}
+                    unoptimized
                     className="h-16 w-auto max-w-[120px] object-contain"
                   />
                   <Button
@@ -551,6 +591,7 @@ export function ChatArea() {
         onOpenChange={setGoalsDialogOpen}
         project={activeProject ?? undefined}
       />
+      <CreateProjectDialog open={createProjectOpen} onOpenChange={setCreateProjectOpen} />
     </div>
   );
 }

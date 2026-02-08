@@ -1,6 +1,7 @@
 "use client";
 
 import { User, Bot } from "lucide-react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import type { ChatMessage } from "@/types";
 
@@ -69,10 +70,13 @@ export function ChatMessageBubble({ message }: ChatMessageBubbleProps) {
         {message.imageUrls && message.imageUrls.length > 0 && (
           <div className="mb-2 flex flex-wrap gap-1">
             {message.imageUrls.map((url, i) => (
-              <img
+              <Image
                 key={i}
                 src={url}
                 alt=""
+                width={128}
+                height={128}
+                unoptimized
                 className="max-h-32 rounded border border-border object-contain"
               />
             ))}

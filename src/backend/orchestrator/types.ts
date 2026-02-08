@@ -2,7 +2,7 @@
  * Orchestrator types: master agent, sub-agents, task flow.
  */
 
-import type { TaskPayload, TaskResult } from "../queue/types.js";
+import type { TaskResult } from "../queue/types.js";
 
 /** Sub-agent contract: run(input) => output */
 export interface ISubAgent {

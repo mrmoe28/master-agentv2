@@ -8,7 +8,7 @@ interface LogState {
   clearLogs: () => void;
 }
 
-export const useLogStore = create<LogState>((set, get) => ({
+export const useLogStore = create<LogState>((set) => ({
   logs: [],
   maxLogs: 500,
   addLog: (entry) =>

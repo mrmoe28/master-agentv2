@@ -17,7 +17,7 @@ const DEMO_LEADS: Lead[] = [
 
 import { logReportSection } from "./report.js";
 
-export function parseLeads(source?: string): string {
+export function parseLeads(_source?: string): string {
   leads = [...DEMO_LEADS];
   const summary = `Parsed ${leads.length} leads: ${leads.map((l) => `${l.name} (${l.email})`).join(", ")}.`;
   logReportSection("Leads organized", summary);

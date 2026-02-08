@@ -5,7 +5,7 @@ export function logReportSection(section: string, content: string): void {
   reportLog.push(`## ${section}\n${content}`);
 }
 
-export async function reportResults(sections?: string[]): Promise<string> {
+export async function reportResults(_sections?: string[]): Promise<string> {
   const text =
     reportLog.length > 0
       ? reportLog.join("\n\n")

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -46,7 +46,7 @@ export function ModelConfigDialog({ open, onOpenChange }: ModelConfigDialogProps
     error: string | null;
   } | null>(null);
 
-  const fetchConfig = async () => {
+  const fetchConfig = useCallback(async () => {
     setConfigLoading(true);
     setDetectResult(null);
     try {
@@ -55,16 +55,16 @@ export function ModelConfigDialog({ open, onOpenChange }: ModelConfigDialogProps
       const data = await res.json();
       setConfig(data);
       if (!detectHost && data.ollamaHost) setDetectHost(data.ollamaHost);
-    } catch (e) {
+    } catch {
       setConfig(null);
     } finally {
       setConfigLoading(false);
     }
-  };
+  }, [detectHost]);
 
   useEffect(() => {
     if (open) fetchConfig();
-  }, [open]);
+  }, [open, fetchConfig]);
 
   const runDetect = async () => {
     const host = detectHost.trim() || "http://localhost:11434";
