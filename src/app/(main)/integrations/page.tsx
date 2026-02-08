@@ -64,6 +64,7 @@ function IntegrationsContent() {
   const [googleTestEmailTo, setGoogleTestEmailTo] = useState("");
   const [googleTestEmailResult, setGoogleTestEmailResult] = useState<{ ok: boolean; message: string } | null>(null);
   const [sendingGoogleTestEmail, setSendingGoogleTestEmail] = useState(false);
+  const [googleRedirectUri, setGoogleRedirectUri] = useState<string | null>(null);
 
   const fetchStatus = async () => {
     try {
@@ -84,6 +85,14 @@ function IntegrationsContent() {
   useEffect(() => {
     fetchStatus();
   }, []);
+
+  useEffect(() => {
+    if (status == null) return;
+    fetch("/api/integrations/google/redirect-uri")
+      .then((r) => r.json())
+      .then((d) => setGoogleRedirectUri(d.redirectUri ?? null))
+      .catch(() => setGoogleRedirectUri(null));
+  }, [status]);
 
   useEffect(() => {
     const connected = searchParams.get("connected");
@@ -263,11 +272,13 @@ function IntegrationsContent() {
                               application&quot;.
                             </li>
                             <li>
-                              Add redirect URI:{" "}
-                              <code className="rounded bg-muted px-1">
-                                {typeof window !== "undefined"
-                                  ? `${window.location.origin}/api/integrations/google/callback`
-                                  : "http://localhost:6001/api/integrations/google/callback"}
+                              Add this exact redirect URI in Google Cloud
+                              Console (copy from below):{" "}
+                              <code className="rounded bg-muted px-1 break-all">
+                                {googleRedirectUri ||
+                                  (typeof window !== "undefined"
+                                    ? `${window.location.origin}/api/integrations/google/callback`
+                                    : "http://localhost:6001/api/integrations/google/callback")}
                               </code>
                             </li>
                             <li>

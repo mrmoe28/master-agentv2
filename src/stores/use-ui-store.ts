@@ -9,6 +9,7 @@ export type SidebarView =
   | "memory"
   | "skills"
   | "integrations"
+  | "docs"
   | "settings";
 
 type RightPanelTab = "tasks" | "logs" | "agents" | "memory";

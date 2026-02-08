@@ -12,17 +12,7 @@ interface AgentState {
 }
 
 export const useAgentStore = create<AgentState>((set, get) => ({
-  agents: [
-    {
-      id: "agent-master",
-      name: "Master Agent",
-      role: "Orchestrator",
-      status: "idle",
-      parentId: null,
-      projectId: "proj-1",
-      createdAt: new Date().toISOString(),
-    },
-  ],
+  agents: [],
   addAgent: (agent) =>
     set((state) => ({ agents: [...state.agents, agent] })),
   updateAgent: (id, updates) =>

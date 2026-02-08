@@ -18,6 +18,7 @@
     "test:agent-chat": "tsx scripts/agent-chat-tests/run-all.ts",
     "chrome:debug": "powershell -ExecutionPolicy Bypass -File scripts/start-chrome-debug.ps1",
     "db:seed-skills": "tsx scripts/seed-skills.ts",
+    "desktop-shortcut": "powershell -ExecutionPolicy Bypass -File scripts/create-desktop-shortcut.ps1",
     "db:clear-skills": "tsx scripts/clear-skills.ts",
     "backend:build": "tsc -p tsconfig.backend.json",
     "backend:worker": "node dist-backend/queue/worker.js",

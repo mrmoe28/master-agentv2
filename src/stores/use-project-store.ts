@@ -12,17 +12,8 @@ interface ProjectState {
 }
 
 export const useProjectStore = create<ProjectState>((set, get) => ({
-  projects: [
-    {
-      id: "proj-1",
-      name: "Default Project",
-      description: "Master Agent control project",
-      goals: ["Respond to user requests", "Delegate to sub-agents when needed"],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-  ],
-  activeProjectId: "proj-1",
+  projects: [],
+  activeProjectId: null,
   setActiveProject: (id) => set({ activeProjectId: id }),
   addProject: (project) =>
     set((state) => ({ projects: [...state.projects, project] })),

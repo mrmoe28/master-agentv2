@@ -9,6 +9,7 @@ import {
   Brain,
   BookOpen,
   Plug,
+  FileText,
   Settings,
   ChevronLeft,
   Sparkles,
@@ -34,6 +35,7 @@ const navItems: { path: string; id: SidebarView; label: string; icon: typeof Fol
   { path: "/memory", id: "memory", label: "Memory", icon: Brain },
   { path: "/skills", id: "skills", label: "Skills", icon: BookOpen },
   { path: "/integrations", id: "integrations", label: "Integrations", icon: Plug },
+  { path: "/docs", id: "docs", label: "Docs", icon: FileText },
   { path: "/settings", id: "settings", label: "Settings", icon: Settings },
 ];
 

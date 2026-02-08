@@ -236,6 +236,19 @@ export function SidebarContent({
     );
   }
 
+  if (view === "docs") {
+    return (
+      <div className="space-y-2">
+        <span className="text-xs font-medium text-muted-foreground">
+          Docs
+        </span>
+        <p className="text-xs text-muted-foreground">
+          How the app works and what each part does.
+        </p>
+      </div>
+    );
+  }
+
   if (view === "settings") {
     return (
       <div className="space-y-2">

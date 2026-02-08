@@ -83,4 +83,93 @@ export const chatIntegrationToolDefs: ChatToolDef[] = [
       return JSON.stringify(result);
     },
   },
+  {
+    name: "schedule_meeting",
+    description:
+      "Add an event to the user's Google Calendar. Use when the user asks to add a calendar event, schedule a meeting, create an event, or put something on their calendar. Requires Google connected in Integrations. Provide summary (title), start and end as ISO 8601 datetime strings (e.g. 2025-02-08T14:00:00 or 2025-02-08T14:00:00-05:00). Optionally include description and attendees (comma-separated emails).",
+    parameters: {
+      type: "object",
+      properties: {
+        summary: {
+          type: "string",
+          description: "Event title/summary",
+        },
+        start: {
+          type: "string",
+          description:
+            "Start time in ISO 8601 format, e.g. 2025-02-08T14:00:00 or 2025-02-08T14:00:00-05:00",
+        },
+        end: {
+          type: "string",
+          description:
+            "End time in ISO 8601 format, e.g. 2025-02-08T15:00:00 or 2025-02-08T15:00:00-05:00",
+        },
+        description: {
+          type: "string",
+          description: "Optional event description",
+        },
+        attendees: {
+          type: "string",
+          description:
+            "Optional comma-separated email addresses of attendees",
+        },
+        timeZone: {
+          type: "string",
+          description:
+            "Optional IANA time zone (e.g. America/New_York). If omitted, times are interpreted in the user's calendar time zone.",
+        },
+      },
+      required: ["summary", "start", "end"],
+    },
+    execute: async (args) => {
+      const ctx = getIntegrationContext();
+      if (!ctx?.integrationService) {
+        return JSON.stringify({
+          success: false,
+          error:
+            "Google Calendar not configured. Connect Google in Integrations.",
+        });
+      }
+      const summary = String(args.summary ?? "").trim();
+      const start = String(args.start ?? "").trim();
+      const end = String(args.end ?? "").trim();
+      if (!summary || !start || !end) {
+        return JSON.stringify({
+          success: false,
+          error: "summary, start, and end are required.",
+        });
+      }
+      const attendeesStr = args.attendees;
+      const attendees =
+        typeof attendeesStr === "string"
+          ? attendeesStr
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean)
+          : Array.isArray(args.attendees)
+            ? (args.attendees as string[]).filter(Boolean)
+            : undefined;
+      const result = await ctx.integrationService.scheduleMeeting(
+        {
+          summary,
+          start,
+          end,
+          description:
+            typeof args.description === "string"
+              ? args.description.trim() || undefined
+              : undefined,
+          attendees: attendees?.length ? attendees : undefined,
+          timeZone:
+            typeof args.timeZone === "string"
+              ? args.timeZone.trim() || undefined
+              : undefined,
+        },
+        ctx.userId ?? "default",
+        typeof args.calendarId === "string" && args.calendarId.trim()
+          ? { calendarId: args.calendarId.trim() }
+          : undefined
+      );
+      return JSON.stringify(result);
+    },
+  },
 ];

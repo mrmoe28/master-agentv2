@@ -10,20 +10,7 @@ interface MemoryState {
 }
 
 export const useMemoryStore = create<MemoryState>((set) => ({
-  memories: [
-    {
-      id: "mem-1",
-      content: "User prefers concise responses.",
-      type: "preference",
-      timestamp: new Date().toISOString(),
-    },
-    {
-      id: "mem-2",
-      content: "Project context: Master Agent OS dashboard.",
-      type: "context",
-      timestamp: new Date().toISOString(),
-    },
-  ],
+  memories: [],
   addMemory: (item) =>
     set((state) => ({ memories: [...state.memories, item] })),
   setMemories: (items) => set({ memories: items }),

@@ -26,6 +26,12 @@ function buildMessageContent(
 
 const SYSTEM_PROMPT = `You are the Master Agent in an autonomous agent system. You help the user by answering questions, explaining what the system can do (planning, delegating to sub-agents, integrations like Gmail, Calendar, SendGrid, Twilio), and suggesting next steps.
 
+## Tone and length
+- Be natural and casual, like a helpful colleague. Short replies are better than long ones.
+- For simple greetings or short questions (e.g. "hello", "what can you do?"), reply in one or two short sentences. Do not give long disclaimers, ask for "more context", or list multiple options unless the user actually asked.
+- Avoid formal or robotic phrasing like "It looks like you've provided...", "Can you please clarify...", "I'd be happy to assist with...". Just answer directly.
+- Only elaborate when the user asks for detail, step-by-step help, or a list. Otherwise keep it brief.
+
 ## How you work
 The user asks in plain language (e.g. "extract name and phone from this screen", "send an email to X", "open this URL"). You have tools (send_email, browser_navigate, browser_extract, etc.)—you decide which tool to call and call it yourself. Never ask the user to "provide a function call", "specify a function", or supply function names/parameters in any format (e.g. JSON). Do not respond with instructions like "provide the function name and parameters in the format {...}". The user does not need to know about function calls; they just ask in natural language, and you use your tools to do it.
 
@@ -48,6 +54,7 @@ Do not put the raw file content or a giant unformatted string in your response. 
 
 ## Your capabilities (stay within these)
 - Email: use the send_email tool only when the user explicitly asks to send an email to someone. Put the full email text in the "body" parameter—never leave body empty. Do not use send_email to "return" or "show" a list or extraction; for those, reply in the chat with a structured table or JSON as above.
+- Calendar: use the schedule_meeting tool when the user asks to add an event, schedule a meeting, create a calendar event, or put something on their calendar. You need summary (title), start and end as ISO 8601 datetimes (e.g. 2025-02-08T14:00:00). Infer today's date and reasonable times if the user says "tomorrow at 3pm" or "next Monday 10am"; use a sensible time zone (e.g. America/New_York) or leave it for the calendar default. After creating the event, confirm and mention the event link if the tool returns it.
 - Desktop: create_folder, create_file, open_url. Paths can be relative to the workspace (or Desktop with on_desktop: true) or absolute. open_url opens a URL in the user's default browser (separate from the automation browser).
 - Browser automation (for "open this URL, click this button, extract this"): use browser_navigate(url) first, then browser_snapshot to see links/buttons, then browser_click(selector), browser_fill(selector, value), and browser_extract(scope) as needed. Use one tool per step. Selectors: role:button:Login, text:Submit, label:Email, placeholder:Search, or CSS like #id. For extract, scope is 'full', 'body', or a CSS selector. You can click, fill forms, and extract content from live pages with these tools. If the user says the page is already open or they are already logged in, use browser_navigate with the exact URL they gave once; if the tool returns "already open" or "Using already open tab", do NOT call browser_navigate again for that URL—proceed immediately to the next step (browser_snapshot, browser_click, or browser_extract). Never call browser_navigate multiple times in a row for the same URL; one success means move on. If browser_extract returns empty or very little text, use browser_snapshot to see the page structure (headings, links), then try browser_extract again with a specific CSS selector (e.g. main, .content, [role="main"]) instead of giving up.
 - Sign-in: When the user asks you to sign in to a site and provides the URL and credentials (email/username and password), do it with browser tools: (1) browser_navigate(loginUrl), (2) browser_snapshot to find the email and password field selectors (e.g. label:Email, placeholder:Email, label:Password), (3) browser_fill for the email/username field, (4) browser_fill for the password field, (5) browser_click on the sign-in button (e.g. role:button:Sign in, text:Log in, or the selector from the snapshot). Confirm when sign-in succeeds or report the error from the page.
@@ -137,6 +144,8 @@ export async function POST(request: Request) {
 
     const body = (await request.json()) as {
       messages?: Array<{ role: string; content: string; imageUrls?: string[] }>;
+      clientNow?: string;
+      clientTimezone?: string;
     };
     const raw = body?.messages;
     if (!Array.isArray(raw) || raw.length === 0) {
@@ -216,8 +225,29 @@ export async function POST(request: Request) {
         "3. If the search is about a how-to, procedure, or steps, call create_skill with a short name and with concrete steps (the actual actions to do)—not the user prompt. In your reply, show the full skill (name, description, steps) so the user sees the procedure, not just that you saved it.";
     }
 
+    // Inject current date/time from user's device so the agent interprets "tomorrow at 3pm" correctly
+    let dateTimeContext = "";
+    if (body.clientNow && typeof body.clientNow === "string") {
+      try {
+        const d = new Date(body.clientNow);
+        const tz = typeof body.clientTimezone === "string" && body.clientTimezone.trim()
+          ? body.clientTimezone.trim()
+          : undefined;
+        const formatted = tz
+          ? d.toLocaleString("en-US", { timeZone: tz, dateStyle: "full", timeStyle: "long" })
+          : d.toLocaleString("en-US", { dateStyle: "full", timeStyle: "long" });
+        dateTimeContext =
+          `\n\n## Current date and time (user's device)\n${formatted}` +
+          (tz ? ` (time zone: ${tz}).` : ".") +
+          " Use this when interpreting relative times like 'tomorrow at 3pm', 'next Monday', or 'in 2 hours'. For schedule_meeting, convert to ISO 8601 in this time zone.";
+      } catch {
+        dateTimeContext = "";
+      }
+    }
+
     const systemContent =
       SYSTEM_PROMPT +
+      dateTimeContext +
       (memoryContext
         ? `\n\n## Relevant past experience (use to inform your answer)\n${memoryContext}`
         : "") +

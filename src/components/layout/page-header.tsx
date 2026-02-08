@@ -4,6 +4,7 @@ import { ChevronLeft, ListTodo, FileText, GitBranch } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useUIStore } from "@/stores/use-ui-store";
+import { LiveClock } from "@/components/layout/live-clock";
 import { cn } from "@/lib/utils";
 
 type RightPanelTab = "tasks" | "logs" | "agents" | "memory";
@@ -43,22 +44,25 @@ export function PageHeader({ title, showPanelButtons = true, className }: PageHe
         </Button>
         <h1 className="truncate font-semibold text-foreground">{title}</h1>
       </div>
-      {showPanelButtons && (
-        <div className="flex shrink-0 items-center gap-1">
-          {panelButtons.map(({ tab, label, icon: Icon }) => (
-            <Button
-              key={tab}
-              variant="ghost"
-              size="sm"
-              className="gap-1.5 text-muted-foreground"
-              onClick={() => handlePanelTab(tab)}
-            >
-              <Icon className="h-4 w-4 shrink-0" />
-              <span className="hidden sm:inline">{label}</span>
-            </Button>
-          ))}
-        </div>
-      )}
+      <div className="flex shrink-0 items-center gap-2">
+        {showPanelButtons && (
+          <>
+            {panelButtons.map(({ tab, label, icon: Icon }) => (
+              <Button
+                key={tab}
+                variant="ghost"
+                size="sm"
+                className="gap-1.5 text-muted-foreground"
+                onClick={() => handlePanelTab(tab)}
+              >
+                <Icon className="h-4 w-4 shrink-0" />
+                <span className="hidden sm:inline">{label}</span>
+              </Button>
+            ))}
+          </>
+        )}
+        <LiveClock />
+      </div>
     </header>
   );
 }
